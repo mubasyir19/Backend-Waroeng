@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  role      RoleUser @default(STAFF)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  Order Order[]
+}
+
+enum RoleUser {
+  ADMIN
+  STAFF
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  products Product[]
+}
+
+model Unit {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  products Product[]
+}
+
+model Product {
+  id         String   @id @default(uuid())
+  categoryId String
+  unitId     String
+  name       String   @db.VarChar(255)
+  price      Int      @db.Integer
+  stock      Int      @db.Integer
+  imageUrl   String   @db.Text
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(6)
+
+  category   Category?   @relation(fields: [categoryId], references: [id])
+  unit       Unit?       @relation(fields: [unitId], references: [id])
+  orderItems OrderItem[]
+}
+
+model Order {
+  id         String      @id @default(uuid())
+  userId     String
+  totalPrice Int         @db.Integer
+  status     OrderStatus @default(PENDING)
+  orderType  OrderType   @default(DINE_IN)
+  address    String?     @db.Text
+  createdAt  DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime    @updatedAt @db.Timestamptz(6)
+
+  user       User?       @relation(fields: [userId], references: [id])
+  payment    Payment?
+  orderItems OrderItem[]
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+enum OrderType {
+  DINE_IN
+  TAKE_AWAY
+  DELIVERY
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int      @db.Integer
+  price     Int      @db.Integer
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  orderId     String        @unique
+  method      PaymentMethod
+  amount      Int           @db.Integer
+  paidAmount  Int?          @db.Integer
+  change      Int?          @db.Integer
+  referenceNo String?       @db.Text
+  status      PaymentStatus @default(PENDING)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(6)
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+enum PaymentMethod {
+  CASH
+  QRIS
+  TRANSFER_BANK
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  EXPIRED
+  REFUNDED
+}
