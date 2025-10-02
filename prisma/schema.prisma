@@ -97,6 +97,7 @@ model OrderItem {
   productId String
   quantity  Int      @db.Integer
   price     Int      @db.Integer
+  note      String   @db.Text
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
 
