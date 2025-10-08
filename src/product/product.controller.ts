@@ -20,9 +20,9 @@ export class ProductController {
     return this.productService.findByCategory(categoryId);
   }
 
-  @Get(':id')
+  @Get('/detail/:id')
   findProductById(@Param('id') id: string) {
-    return this.productService.findByCategory(id);
+    return this.productService.findById(id);
   }
 
   @Post('/add')

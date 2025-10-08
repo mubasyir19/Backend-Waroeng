@@ -54,7 +54,7 @@ export class ProductService {
         where: { id },
       });
 
-      if (product) {
+      if (!product) {
         return {
           code: 'NOT_FOUND',
           message: 'Empty data',
