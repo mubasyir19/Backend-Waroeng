@@ -109,21 +109,27 @@ model Payment {
   id          String        @id @default(uuid())
   orderId     String        @unique
   method      PaymentMethod
+  provider    String?       @db.VarChar(255) // "GoPay", "OVO", "BCA", dll
   amount      Int           @db.Integer
-  paidAmount  Int?          @db.Integer
-  change      Int?          @db.Integer
-  referenceNo String?       @db.Text
+  paidAmount  Int?          @db.Integer      // cash
+  change      Int?          @db.Integer      // cash
+  referenceNo String?       @db.Text         // qris/transfer/e-wallet
+  note        String?       @db.Text         // catatan tambahan jika perlu
   status      PaymentStatus @default(PENDING)
   createdAt   DateTime      @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime      @updatedAt @db.Timestamptz(6)
 
   order Order @relation(fields: [orderId], references: [id])
+
+  @@index([method])
+  @@index([status])
 }
 
 enum PaymentMethod {
   CASH
   QRIS
   TRANSFER_BANK
+  E_WALLET
 }
 
 enum PaymentStatus {
