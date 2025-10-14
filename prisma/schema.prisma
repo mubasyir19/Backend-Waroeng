@@ -66,7 +66,8 @@ model Product {
 
 model Order {
   id         String      @id @default(uuid())
-  userId     String
+  waiterId   String
+  customer   String      @db.VarChar(255)
   totalPrice Int         @db.Integer
   status     OrderStatus @default(PENDING)
   orderType  OrderType   @default(DINE_IN)
@@ -74,7 +75,7 @@ model Order {
   createdAt  DateTime    @default(now()) @db.Timestamptz(6)
   updatedAt  DateTime    @updatedAt @db.Timestamptz(6)
 
-  user       User?       @relation(fields: [userId], references: [id])
+  waiter     User?       @relation(fields: [waiterId], references: [id])
   payment    Payment?
   orderItems OrderItem[]
 }
@@ -111,10 +112,10 @@ model Payment {
   method      PaymentMethod
   provider    String?       @db.VarChar(255) // "GoPay", "OVO", "BCA", dll
   amount      Int           @db.Integer
-  paidAmount  Int?          @db.Integer      // cash
-  change      Int?          @db.Integer      // cash
-  referenceNo String?       @db.Text         // qris/transfer/e-wallet
-  note        String?       @db.Text         // catatan tambahan jika perlu
+  paidAmount  Int?          @db.Integer // cash
+  change      Int?          @db.Integer // cash
+  referenceNo String?       @db.Text // qris/transfer/e-wallet
+  note        String?       @db.Text // catatan tambahan jika perlu
   status      PaymentStatus @default(PENDING)
   createdAt   DateTime      @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime      @updatedAt @db.Timestamptz(6)
