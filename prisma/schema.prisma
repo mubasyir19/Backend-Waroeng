@@ -103,7 +103,7 @@ model OrderItem {
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
 
   order   Order   @relation(fields: [orderId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Payment {
@@ -120,7 +120,7 @@ model Payment {
   createdAt   DateTime      @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime      @updatedAt @db.Timestamptz(6)
 
-  order Order @relation(fields: [orderId], references: [id])
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([method])
   @@index([status])
