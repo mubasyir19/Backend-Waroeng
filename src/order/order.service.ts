@@ -53,7 +53,23 @@ export class OrderService {
     return `This action updates a #${id} order`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+  async remove(id: string) {
+    try {
+      const res = await this.prisma.order.delete({
+        where: { id },
+      });
+
+      return {
+        code: 'DELETED',
+        message: 'Successfully deleted order and related items',
+        data: res,
+      };
+    } catch (error) {
+      console.log('(backend) terjadi error hapus order:', error);
+      throw new InternalServerErrorException({
+        message: 'Failed to delete order',
+        data: `${error}`,
+      });
+    }
   }
 }
