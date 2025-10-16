@@ -15,6 +15,12 @@ export enum OrderType {
   DELIVERY = 'DELIVERY',
 }
 
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  CANCELED = 'CANCELED',
+}
+
 export class CreateOrderItemDto {
   @IsString() productId: string;
   @IsNumber() @Min(1) quantity: number;
