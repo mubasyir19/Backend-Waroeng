@@ -1,7 +1,13 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/prisma.service';
+import { existsSync, renameSync, unlinkSync } from 'fs';
+import { extname } from 'path';
 
 @Injectable()
 export class ProductService {
@@ -75,27 +81,36 @@ export class ProductService {
     }
   }
 
-  async create(dto: CreateProductDto) {
+  async create(dto: CreateProductDto, file?: Express.Multer.File) {
     try {
-      // Tambah product ke database
+      let imageUrl = dto.imageUrl;
+
+      if (file) {
+        imageUrl = `/uploads/products/${file.filename}`;
+      }
+
+      if (!imageUrl && !file) {
+        throw new BadRequestException('Image is required');
+      }
+
       const add = await this.prisma.product.create({
         data: {
           categoryId: dto.categoryId,
           unitId: dto.unitId,
           name: dto.name,
-          price: dto.price,
-          stock: dto.stock,
-          imageUrl: dto.imageUrl,
+          price: +dto.price,
+          stock: +dto.stock,
+          imageUrl: imageUrl ?? '',
         },
       });
 
-      // Return response sukses
       return {
         code: 'CREATED',
         message: 'Successfully add product',
         data: add,
       };
     } catch (error) {
+      console.log('(backend) terjadi error', error);
       throw new InternalServerErrorException({
         message: 'Failed add product',
         data: `${error}`,
@@ -103,7 +118,7 @@ export class ProductService {
     }
   }
 
-  async update(id: string, dto: UpdateProductDto) {
+  async update(id: string, dto: UpdateProductDto, file?: Express.Multer.File) {
     try {
       // Cek id product
       if (id === '' || id === null) {
@@ -113,7 +128,48 @@ export class ProductService {
           data: null,
         };
       }
-      // Update product dan kirim ke database
+
+      const existingProduct = await this.prisma.product.findUnique({
+        where: { id },
+      });
+
+      if (!existingProduct) {
+        throw new BadRequestException('Product not found');
+      }
+
+      let imageUrl = dto.imageUrl;
+
+      // if there is new file, generate file name with timestamp for bypass cache
+      if (file) {
+        const timestamp = Date.now();
+        const uniqueSuffix = timestamp + '-' + Math.round(Math.random() * 1e9);
+        const ext = extname(file.originalname);
+        const filename = `product-${uniqueSuffix}${ext}`;
+
+        imageUrl = `/uploads/products/${filename}`;
+
+        // move file with new name
+        const newPath = `./uploads/products/${filename}`;
+        await this.moveFile(file.path, newPath);
+
+        // Delete old image file
+        if (existingProduct.imageUrl && existingProduct.imageUrl !== '') {
+          const oldImagePath = `.${existingProduct.imageUrl}`;
+          try {
+            if (existsSync(oldImagePath)) {
+              unlinkSync(oldImagePath);
+            }
+          } catch (fileError) {
+            console.warn('Failed to delete old image:', fileError);
+          }
+        }
+      }
+      // if there is no new file, retain the existing imageUrl
+      else if (!imageUrl) {
+        imageUrl = existingProduct.imageUrl;
+      }
+
+      // Update product and send to database
       const edit = await this.prisma.product.update({
         where: { id },
         data: {
@@ -122,7 +178,7 @@ export class ProductService {
           name: dto.name,
           price: dto.price,
           stock: dto.stock,
-          imageUrl: dto.imageUrl,
+          imageUrl: imageUrl ?? existingProduct.imageUrl,
         },
       });
 
@@ -133,6 +189,7 @@ export class ProductService {
         data: edit,
       };
     } catch (error) {
+      console.log('(backend) terjadi error', error);
       throw new InternalServerErrorException({
         message: 'Failed update product',
         data: `${error}`,
@@ -167,5 +224,12 @@ export class ProductService {
         data: `${error}`,
       });
     }
+  }
+
+  private async moveFile(oldPath: string, newPath: string): Promise<void> {
+    return new Promise((resolve) => {
+      renameSync(oldPath, newPath);
+      resolve();
+    });
   }
 }
