@@ -12,6 +12,7 @@ async function main() {
     create: {
       name: 'Admin POS',
       email: 'admin@pos.com',
+      username: 'adminPOS',
       password: adminPassword,
       role: RoleUser.ADMIN,
     },
