@@ -30,6 +30,7 @@ export class CreateOrderItemDto {
 
 export class CreateOrderDto {
   @IsString() waiterId: string;
+  @IsString() receipt_code: string;
   @IsString() customer: string;
   @IsString() @IsEnum(OrderType) orderType: OrderType;
   @IsNumber() @Min(0) totalPrice: number;
