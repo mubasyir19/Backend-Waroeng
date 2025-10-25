@@ -77,15 +77,16 @@ model Product {
 }
 
 model Order {
-  id         String      @id @default(uuid())
-  waiterId   String
-  customer   String      @db.VarChar(255)
-  totalPrice Int         @db.Integer
-  status     OrderStatus @default(PENDING)
-  orderType  OrderType   @default(DINE_IN)
-  address    String?     @db.Text
-  createdAt  DateTime    @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime    @updatedAt @db.Timestamptz(6)
+  id           String      @id @default(uuid())
+  waiterId     String
+  receipt_code String      @db.VarChar(255)
+  customer     String      @db.VarChar(255)
+  totalPrice   Int         @db.Integer
+  status       OrderStatus @default(PENDING)
+  orderType    OrderType   @default(DINE_IN)
+  address      String?     @db.Text
+  createdAt    DateTime    @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime    @updatedAt @db.Timestamptz(6)
 
   waiter     User?       @relation(fields: [waiterId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   payment    Payment?
