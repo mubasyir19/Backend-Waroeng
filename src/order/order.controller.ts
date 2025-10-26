@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto, OrderStatus } from './dto/create-order.dto';
-import { CreatePaymentDto } from './dto/create-payment.dto';
 import { AuthGuard } from 'src/user/guards/jwt-auth.guard';
 
 @Controller('order')
@@ -27,15 +26,6 @@ export class OrderController {
   @UseGuards(AuthGuard)
   update(@Param('id') orderId: string, @Body() status: OrderStatus) {
     return this.orderService.updateStatusOrder(orderId, status);
-  }
-
-  @Post('/payment/:orderId')
-  @UseGuards(AuthGuard)
-  paymentOrder(
-    @Param('id') orderId: string,
-    @Body() createPaymentDto: CreatePaymentDto,
-  ) {
-    return this.orderService.completePayment(orderId, createPaymentDto);
   }
 
   @Get(':id')
