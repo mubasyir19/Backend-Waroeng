@@ -50,6 +50,13 @@ export class OrderService {
         where: {
           id: orderId,
         },
+        include: {
+          orderItems: {
+            include: {
+              product: true,
+            },
+          },
+        },
       });
 
       if (!res) {
