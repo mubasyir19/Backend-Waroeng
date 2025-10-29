@@ -24,22 +24,26 @@ model User {
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
 
   Order Order[]
+  Store Store?
+}
+
+enum RoleUser {
+  OWNER
+  ADMIN
+  STAFF
 }
 
 model Store {
   id          String   @id @default(uuid())
+  owner_id    String   @unique @db.VarChar(255)
   store_name  String   @db.VarChar(255)
   address     String   @db.Text
   phoneNumber String   @db.VarChar(13)
   email       String   @db.VarChar(255)
-  owner       String   @db.VarChar(255)
   createdAt   DateTime @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @db.Timestamptz(6)
-}
 
-enum RoleUser {
-  ADMIN
-  STAFF
+  owner User? @relation(fields: [owner_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
 }
 
 model Category {
