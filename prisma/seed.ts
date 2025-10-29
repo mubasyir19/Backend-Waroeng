@@ -18,6 +18,31 @@ async function main() {
     },
   });
 
+  // --- User Owner ---
+  const ownerPassword = await bcrypt.hash('owner123', 10);
+  const owner = await prisma.user.upsert({
+    where: { email: 'owner@waroeng.com' },
+    update: {},
+    create: {
+      name: 'Pemilik Waroeng',
+      email: 'owner@waroeng.com',
+      username: 'ownerWaroeng',
+      password: ownerPassword,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      role: RoleUser.OWNER,
+    },
+  });
+
+  const store = await prisma.store.create({
+    data: {
+      store_name: 'Waroeng',
+      email: 'waroeng@mail.com',
+      address: 'Jl. Kenangan no.7, Kota Jakarta Selatan',
+      owner_id: owner.id,
+      phoneNumber: '08123456789',
+    },
+  });
+
   // --- Units ---
   const units = await prisma.unit.createMany({
     data: [
