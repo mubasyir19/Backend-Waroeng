@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateOrderDto, OrderStatus } from './dto/create-order.dto';
 import { PrismaService } from 'src/prisma.service';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class OrderService {
@@ -110,8 +111,47 @@ export class OrderService {
     }
   }
 
-  findAll() {
-    return `This action returns all order`;
+  async findAll(paginationDto?: PaginationDto) {
+    try {
+      const page = paginationDto?.page || 1;
+      const limit = paginationDto?.limit || 10;
+      const skip = (page - 1) * limit;
+
+      const [data, total] = await Promise.all([
+        this.prisma.order.findMany({
+          include: {
+            payment: true,
+          },
+          skip: skip,
+          take: limit,
+          orderBy: {
+            createdAt: 'desc',
+          },
+        }),
+        this.prisma.order.count(),
+      ]);
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        code: 'SUCCESS',
+        message: 'Successfully get list order',
+        data: data,
+        meta: {
+          currentPage: page,
+          itemsPerPage: limit,
+          totalItems: total,
+          totalPages: totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1,
+        },
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: 'Failed get list order',
+        data: `${error}`,
+      });
+    }
   }
 
   findOne(id: number) {
