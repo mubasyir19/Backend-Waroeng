@@ -173,8 +173,6 @@ export class OrderService {
         take: 4,
       });
 
-      console.log('hasil group = ', mostOrdered);
-
       const listProducts = await Promise.all(
         mostOrdered.map(async (item) => {
           const product = await this.prisma.product.findUnique({
@@ -188,8 +186,6 @@ export class OrderService {
           };
         }),
       );
-
-      console.log('list produk = ', listProducts);
 
       return {
         code: 'SUCCESS',
@@ -216,7 +212,6 @@ export class OrderService {
         data: res,
       };
     } catch (error) {
-      console.log('(backend) terjadi error hapus order:', error);
       throw new InternalServerErrorException({
         message: 'Failed to delete order',
         data: `${error}`,

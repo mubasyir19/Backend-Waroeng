@@ -110,7 +110,6 @@ export class ProductService {
         data: add,
       };
     } catch (error) {
-      console.log('(backend) terjadi error', error);
       throw new InternalServerErrorException({
         message: 'Failed add product',
         data: `${error}`,
@@ -189,7 +188,6 @@ export class ProductService {
         data: edit,
       };
     } catch (error) {
-      console.log('(backend) terjadi error', error);
       throw new InternalServerErrorException({
         message: 'Failed update product',
         data: `${error}`,

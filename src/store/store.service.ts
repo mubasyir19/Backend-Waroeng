@@ -125,7 +125,6 @@ export class StoreService {
         data: updateData,
       };
     } catch (error) {
-      console.log('an error occured', error);
       throw new InternalServerErrorException({
         message: 'Failed add data store',
         data: `${error}`,
