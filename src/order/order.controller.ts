@@ -7,10 +7,12 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto, OrderStatus } from './dto/create-order.dto';
 import { AuthGuard } from 'src/user/guards/jwt-auth.guard';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('order')
 export class OrderController {
@@ -36,8 +38,8 @@ export class OrderController {
 
   @Get()
   @UseGuards(AuthGuard)
-  findAll() {
-    return this.orderService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.orderService.findAll(paginationDto);
   }
 
   @Delete('/delete/:id')
