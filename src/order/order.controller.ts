@@ -24,6 +24,12 @@ export class OrderController {
     return this.orderService.checkout(createOrderDto);
   }
 
+  @Get('/mostOrdered')
+  @UseGuards(AuthGuard)
+  getMostOrderedProducts() {
+    return this.orderService.mostOrderedProduct();
+  }
+
   @Patch('/status/:id')
   @UseGuards(AuthGuard)
   update(@Param('id') orderId: string, @Body() status: OrderStatus) {

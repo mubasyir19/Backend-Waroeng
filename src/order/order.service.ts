@@ -158,6 +158,52 @@ export class OrderService {
     return `This action returns a #${id} order`;
   }
 
+  async mostOrderedProduct() {
+    try {
+      const mostOrdered = await this.prisma.orderItem.groupBy({
+        by: ['productId'],
+        _sum: {
+          quantity: true,
+        },
+        orderBy: {
+          _sum: {
+            quantity: 'desc',
+          },
+        },
+        take: 4,
+      });
+
+      console.log('hasil group = ', mostOrdered);
+
+      const listProducts = await Promise.all(
+        mostOrdered.map(async (item) => {
+          const product = await this.prisma.product.findUnique({
+            where: { id: item.productId },
+          });
+
+          return {
+            productId: item.productId,
+            totalOrdered: item._sum.quantity,
+            product,
+          };
+        }),
+      );
+
+      console.log('list produk = ', listProducts);
+
+      return {
+        code: 'SUCCESS',
+        message: 'Successfully get most order product',
+        data: listProducts,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: 'Failed get most order product',
+        data: `${error}`,
+      });
+    }
+  }
+
   async remove(id: string) {
     try {
       const res = await this.prisma.order.delete({
