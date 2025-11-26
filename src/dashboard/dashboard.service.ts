@@ -39,4 +39,44 @@ export class DashboardService {
       });
     }
   }
+
+  async statiticsCategory() {
+    try {
+      const categoryStats = await this.prisma.category.findMany({
+        select: {
+          id: true,
+          name: true,
+          products: {
+            select: {
+              orderItems: {
+                select: { quantity: true },
+              },
+            },
+          },
+        },
+      });
+
+      const result = categoryStats.map((cat) => ({
+        category: cat.name,
+        totalOrdered: cat.products.reduce((acc, product) => {
+          const qty = product.orderItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          );
+          return acc + qty;
+        }, 0),
+      }));
+
+      return {
+        code: 'SUCCESS',
+        message: 'Successfully get dashboard stats',
+        data: result,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: 'Failed get statistics category',
+        data: `${error}`,
+      });
+    }
+  }
 }

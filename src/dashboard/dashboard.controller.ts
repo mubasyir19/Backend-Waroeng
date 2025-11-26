@@ -11,4 +11,10 @@ export class DashboardController {
   getDashboardStats() {
     return this.dashboardService.dashboardData();
   }
+
+  @Get('/category/stats')
+  @UseGuards(AuthGuard)
+  getCategoryStats() {
+    return this.dashboardService.statiticsCategory();
+  }
 }
