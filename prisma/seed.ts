@@ -1,7 +1,13 @@
-import { PrismaClient, RoleUser } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
+
+enum RoleUser {
+  OWNER = 'OWNER',
+  ADMIN = 'ADMIN',
+  CLIENT = 'CLIENT',
+}
 
 async function main() {
   // --- User Admin ---
